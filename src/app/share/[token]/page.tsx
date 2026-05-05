@@ -65,17 +65,15 @@ export default function PublicInvoicePage() {
 
           <div className="relative z-10 text-center space-y-8 max-w-2xl">
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.4)] animate-bounce">
-                <Sparkles className="h-8 w-8 text-white" />
-              </div>
+               <img src="/logo.png" alt="Arise Logo" className="h-32 object-contain animate-bounce" />
             </div>
             
-            <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-cyan-400 animate-fade-in">
+            <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-orange-400 animate-fade-in">
               Incoming Document
             </h2>
             
             <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white animate-slide-in-up">
-              Hello, <span className="text-glow bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">{invoice.client_name.split(' ')[0]}</span>
+              Hello, <span className="text-glow bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-yellow-300">{invoice.client_name.split(' ')[0]}</span>
             </h1>
             
             <p className="text-navy-300 text-lg md:text-xl animate-fade-in delay-500 leading-relaxed">
@@ -117,7 +115,7 @@ export default function PublicInvoicePage() {
            <div className="flex items-center gap-3 w-full md:w-auto">
               <a 
                 href={upiLink}
-                className="btn-primary flex-1 md:flex-none py-3 px-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 border-none shadow-[0_0_20px_rgba(34,197,94,0.3)]"
+                className="btn-primary flex-1 md:flex-none py-3 px-6 bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-500 hover:to-yellow-500 border-none shadow-[0_0_20px_rgba(249,115,22,0.3)]"
               >
                 <CreditCard className="h-5 w-5" />
                 Pay via UPI

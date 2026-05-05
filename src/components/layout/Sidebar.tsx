@@ -37,11 +37,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-5 border-b border-navy-700/40">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-[0_0_12px_rgba(6,182,212,0.4)]">
-              <FileText className="h-4 w-4 text-white" />
-            </div>
-            <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
-              AriseOS
+            <img src="/logo.png" alt="Arise Logo" className="h-8 object-contain" />
+            <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-yellow-300">
+              Arise
             </span>
           </Link>
           <button

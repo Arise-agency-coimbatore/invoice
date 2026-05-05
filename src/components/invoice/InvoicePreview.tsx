@@ -33,14 +33,11 @@ export default function InvoicePreview({ data, id = 'invoice-document' }: Invoic
           {/* Header */}
           <div className="flex justify-between items-start mb-12">
              <div>
-                <div className="flex items-center gap-2 mb-2">
-                   <div className="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center">
-                      <FileText className="h-6 w-6 text-white" />
-                   </div>
-                   <span className="text-2xl font-bold tracking-tight text-slate-900 uppercase">AriseOS</span>
+                <div className="mb-4">
+                   <img src="/logo.png" alt="Arise Logo" className="h-20 object-contain" />
                 </div>
                 <p className="text-sm text-slate-500 max-w-xs">
-                   Modern business infrastructure for the next generation of agencies.
+                   Where the growth begins.
                 </p>
              </div>
              <div className="text-right">

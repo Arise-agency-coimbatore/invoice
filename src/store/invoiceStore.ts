@@ -111,7 +111,7 @@ export const useInvoiceStore = create<InvoiceState>((set, get) => ({
       .single();
 
     if (invoiceError || !invoice) {
-      console.error('Failed to create invoice:', invoiceError);
+      console.error('CRITICAL: Invoice creation failed:', invoiceError);
       set({ isLoading: false });
       return null;
     }

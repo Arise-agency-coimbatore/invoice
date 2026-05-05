@@ -24,6 +24,8 @@ export interface Invoice {
   tax: number;
   total: number;
   notes: string;
+  share_token: string;
+  is_public: boolean;
   created_at: string;
   items?: InvoiceItem[];
 }
@@ -44,6 +46,8 @@ interface InvoiceState {
   deleteInvoice: (id: string) => Promise<void>;
   getNextInvoiceNumber: () => Promise<string>;
   getInvoiceWithItems: (id: string) => Promise<Invoice | null>;
+  toggleInvoiceShare: (id: string) => Promise<string | null>;
+  getInvoiceByToken: (token: string) => Promise<Invoice | null>;
 }
 
 export const useInvoiceStore = create<InvoiceState>((set, get) => ({
@@ -209,6 +213,49 @@ export const useInvoiceStore = create<InvoiceState>((set, get) => ({
       .from('invoice_items')
       .select('*')
       .eq('invoice_id', id);
+
+    return { ...invoice, items: items || [] };
+  },
+
+  toggleInvoiceShare: async (id) => {
+    const invoice = (await supabase.from('invoices').select('is_public, share_token').eq('id', id).single()).data;
+    if (!invoice) return null;
+
+    const newIsPublic = !invoice.is_public;
+    const { data: updated, error } = await supabase
+      .from('invoices')
+      .update({ is_public: newIsPublic })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Failed to toggle share:', error);
+      return null;
+    }
+
+    set((state) => ({
+      invoices: state.invoices.map((inv) =>
+        inv.id === id ? { ...inv, ...updated } : inv
+      ),
+    }));
+
+    return newIsPublic ? updated.share_token : null;
+  },
+
+  getInvoiceByToken: async (token) => {
+    const { data: invoice, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('share_token', token)
+      .single();
+
+    if (error || !invoice) return null;
+
+    const { data: items } = await supabase
+      .from('invoice_items')
+      .select('*')
+      .eq('invoice_id', invoice.id);
 
     return { ...invoice, items: items || [] };
   },

@@ -17,6 +17,8 @@ CREATE TABLE public.invoices (
   tax numeric default 0,
   total numeric default 0,
   notes text,
+  share_token uuid default gen_random_uuid() unique not null,
+  is_public boolean default false not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -51,6 +53,10 @@ CREATE POLICY "Users can only delete their own invoices"
   ON public.invoices FOR DELETE
   USING (auth.uid() = user_id);
 
+CREATE POLICY "Public can view shared invoices by token"
+  ON public.invoices FOR SELECT
+  USING (is_public = true);
+
 -- 5. RLS Policies for Invoice Items (via parent invoice ownership)
 CREATE POLICY "Users can view their own invoice items"
   ON public.invoice_items FOR SELECT
@@ -58,7 +64,7 @@ CREATE POLICY "Users can view their own invoice items"
     EXISTS (
       SELECT 1 FROM public.invoices
       WHERE invoices.id = invoice_items.invoice_id
-      AND invoices.user_id = auth.uid()
+      AND (invoices.user_id = auth.uid() OR invoices.is_public = true)
     )
   );
 

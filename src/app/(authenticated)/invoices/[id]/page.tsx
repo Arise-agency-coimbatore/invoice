@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useInvoiceStore, Invoice } from '@/store/invoiceStore';
-import { ChevronLeft, Download, Trash2, Printer, CheckCircle2, Clock } from 'lucide-react';
+import { ChevronLeft, Download, Trash2, Printer, CheckCircle2, Clock, Share2, Link as LinkIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import InvoicePreview from '@/components/invoice/InvoicePreview';
@@ -14,7 +14,7 @@ import Modal from '@/components/ui/Modal';
 export default function InvoiceDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { getInvoiceWithItems, updateInvoiceStatus, deleteInvoice } = useInvoiceStore();
+  const { getInvoiceWithItems, updateInvoiceStatus, deleteInvoice, toggleInvoiceShare } = useInvoiceStore();
   const { addToast } = useToastStore();
   
   const [invoice, setInvoice] = useState<Invoice | null>(null);
@@ -51,6 +51,18 @@ export default function InvoiceDetailPage() {
     await deleteInvoice(invoice.id);
     addToast('success', 'Invoice deleted');
     router.push('/dashboard');
+  };
+
+  const handleShare = async () => {
+    if (!invoice) return;
+    const token = await toggleInvoiceShare(invoice.id);
+    if (token) {
+      const shareUrl = `${window.location.origin}/share/${token}`;
+      navigator.clipboard.writeText(shareUrl);
+      addToast('success', 'Public link copied to clipboard!');
+    } else {
+      addToast('info', 'Sharing disabled');
+    }
   };
 
   if (isLoading) {
@@ -109,6 +121,15 @@ export default function InvoiceDetailPage() {
               <CheckCircle2 className="h-4 w-4" />
             </button>
           </div>
+
+          <button 
+            onClick={handleShare} 
+            className={`btn-secondary py-2.5 ${invoice.is_public ? 'border-cyan-500/50 text-cyan-400' : ''}`}
+            title={invoice.is_public ? "Copy Public Link" : "Enable Public Sharing"}
+          >
+            {invoice.is_public ? <LinkIcon className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
+            {invoice.is_public ? 'Shared' : 'Share'}
+          </button>
 
           <button onClick={handleDownload} className="btn-secondary py-2.5">
             <Download className="h-4 w-4" />

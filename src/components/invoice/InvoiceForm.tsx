@@ -48,6 +48,7 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
     control,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<InvoiceFormValues>({
     defaultValues: initialData || {
@@ -87,7 +88,6 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
        return;
     }
 
-    // Clear existing items if they are empty, or just append
     const currentItems = getValues('items');
     const isEmpty = currentItems.length === 1 && currentItems[0].name === '' && currentItems[0].price === 0;
     
@@ -100,14 +100,12 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
     addToast('success', `Imported ${projectTasks.length} tasks as line items.`);
   };
 
-  // Load next invoice number on mount if not provided
   useEffect(() => {
     if (!initialData) {
       getNextInvoiceNumber().then((num) => setValue('invoice_number', num));
     }
   }, [getNextInvoiceNumber, setValue, initialData]);
 
-  // Calculate totals and notify parent for preview
   const calculatedData = useMemo(() => {
     const items = (watchedValues.items || []).map((item: any) => ({
       ...item,
@@ -164,21 +162,21 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-20">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 md:space-y-8 pb-20">
       {/* Client Info Section */}
-      <section className="glass-card p-6 space-y-4">
-        <div className="flex items-center justify-between mb-2">
+      <section className="glass-card p-4 md:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-cyan-400" />
-            <h2 className="text-sm font-bold uppercase tracking-widest text-navy-200">Client Information</h2>
+            <h2 className="text-sm font-bold uppercase tracking-widest text-navy-200">Client Info</h2>
           </div>
           
           <select 
             value={selectedClientId} 
             onChange={(e) => handleClientSelect(e.target.value)}
-            className="bg-navy-900 border border-navy-700 text-xs text-navy-200 rounded-lg px-2 py-1 outline-none focus:border-cyan-500"
+            className="bg-navy-900 border border-navy-700 text-[10px] sm:text-xs text-navy-200 rounded-lg px-2 py-1 outline-none focus:border-cyan-500 w-full sm:w-auto"
           >
-            <option value="">Existing Client...</option>
+            <option value="">Select Existing Client...</option>
             {clients.map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
@@ -187,7 +185,7 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-navy-400 ml-1">Client Name</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-navy-500 ml-1">Client Name</label>
             <div className="relative">
               <input
                 {...register('client_name', { required: true })}
@@ -196,10 +194,10 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
               />
               <User className="absolute left-3 top-3 h-4 w-4 text-navy-500" />
             </div>
-            {errors.client_name && <p className="text-[10px] text-red-400 ml-1">Client name is required</p>}
+            {errors.client_name && <p className="text-[10px] text-red-400 ml-1">Required</p>}
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-navy-400 ml-1">Client Email</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-navy-500 ml-1">Client Email</label>
             <div className="relative">
               <input
                 type="email"
@@ -215,7 +213,7 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
         {/* Project Selection */}
         {selectedClientId && (
            <div className="pt-4 border-t border-navy-800 animate-fade-in">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-end gap-4">
                  <div className="flex-1 w-full">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-navy-500 mb-1.5 block ml-1">Link to Project</label>
                     <div className="relative">
@@ -236,10 +234,10 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
                     <button
                        type="button"
                        onClick={importCompletedTasks}
-                       className="btn-secondary py-2.5 mt-5 sm:mt-0 w-full sm:w-auto"
+                       className="btn-secondary py-3 px-4 w-full sm:w-auto whitespace-nowrap"
                     >
                        <Import className="h-4 w-4" />
-                       Import Completed Tasks
+                       Import Tasks
                     </button>
                  )}
               </div>
@@ -248,14 +246,14 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
       </section>
 
       {/* Invoice Details Section */}
-      <section className="glass-card p-6 space-y-4">
+      <section className="glass-card p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <FileText className="h-4 w-4 text-cyan-400" />
-          <h2 className="text-sm font-bold uppercase tracking-widest text-navy-200">Invoice Details</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-navy-200">Details</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-navy-400 ml-1">Invoice Number</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-navy-500 ml-1">Invoice #</label>
             <div className="relative">
               <input
                 {...register('invoice_number', { required: true })}
@@ -265,7 +263,7 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-navy-400 ml-1">Issue Date</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-navy-500 ml-1">Issue Date</label>
             <div className="relative">
               <input
                 type="date"
@@ -276,7 +274,7 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
             </div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-navy-400 ml-1">Due Date</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-navy-500 ml-1">Due Date</label>
             <div className="relative">
               <input
                 type="date"
@@ -290,7 +288,7 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
       </section>
 
       {/* Line Items Section */}
-      <section className="glass-card p-6 space-y-6">
+      <section className="glass-card p-4 md:p-6 space-y-6">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <StickyNote className="h-4 w-4 text-cyan-400" />
@@ -306,21 +304,25 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
           </button>
         </div>
 
-        <div className="space-y-4">
-          {fields.map((field, index) => (
-            <LineItemRow
-              key={field.id}
-              index={index}
-              register={register}
-              onRemove={remove}
-              total={(watchedValues.items?.[index]?.quantity || 0) * (watchedValues.items?.[index]?.price || 0)}
-            />
-          ))}
-          {fields.length === 0 && (
-            <div className="text-center py-8 border-2 border-dashed border-navy-800 rounded-xl">
-              <p className="text-sm text-navy-500">No items added. Click &quot;Add Item&quot; to begin.</p>
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <div className="min-w-[600px] px-4 sm:px-0 space-y-4">
+            <div className="grid grid-cols-[1fr_80px_120px_100px_40px] gap-4 px-2 text-[10px] font-bold uppercase tracking-widest text-navy-500">
+              <div className="ml-1">Description</div>
+              <div className="text-center">Qty</div>
+              <div className="text-center">Price</div>
+              <div className="text-center">Total</div>
+              <div></div>
             </div>
-          )}
+            {fields.map((field, index) => (
+              <LineItemRow
+                key={field.id}
+                index={index}
+                register={register}
+                onRemove={remove}
+                total={(watchedValues.items?.[index]?.quantity || 0) * (watchedValues.items?.[index]?.price || 0)}
+              />
+            ))}
+          </div>
         </div>
 
         <div className="pt-6 border-t border-navy-800 flex flex-col items-end gap-3">
@@ -336,23 +338,23 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
             </div>
           </div>
           <div className="text-right">
-             <p className="text-xs text-navy-400 uppercase tracking-widest">Grand Total</p>
+             <p className="text-[10px] text-navy-400 uppercase tracking-widest">Grand Total</p>
              <p className="text-3xl font-black text-cyan-400 text-glow">₹{calculatedData.total.toLocaleString()}</p>
           </div>
         </div>
       </section>
 
       {/* Notes Section */}
-      <section className="glass-card p-6 space-y-4">
+      <section className="glass-card p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <StickyNote className="h-4 w-4 text-cyan-400" />
-          <h2 className="text-sm font-bold uppercase tracking-widest text-navy-200">Notes & Terms</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-navy-200">Notes</h2>
         </div>
         <textarea
           {...register('notes')}
           rows={3}
           className="input-field resize-none"
-          placeholder="Additional instructions or payment terms..."
+          placeholder="Payment terms, bank details, etc..."
         />
       </section>
 
@@ -364,15 +366,15 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
           className="btn-primary flex-1 py-4 text-base shadow-[0_0_25px_rgba(6,182,212,0.4)]"
         >
           <Save className="h-5 w-5" />
-          {isSaving ? 'Saving Invoice...' : 'Save Invoice'}
+          {isSaving ? 'Saving...' : 'Save Invoice'}
         </button>
         <button
           type="button"
           onClick={() => downloadInvoicePDF('invoice-document', calculatedData.invoice_number || 'INV-PREVIEW')}
-          className="btn-secondary py-4 text-base"
+          className="btn-secondary py-4 text-base flex-1 sm:flex-none sm:px-8"
         >
           <Download className="h-5 w-5" />
-          Download Preview
+          Preview
         </button>
       </div>
     </form>

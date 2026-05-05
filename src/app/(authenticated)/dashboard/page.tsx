@@ -57,7 +57,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard 
           label="Total Revenue" 
           value={`₹${stats.totalRevenue.toLocaleString()}`} 
@@ -86,12 +86,12 @@ export default function DashboardPage() {
 
       {/* Filters & Search */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 glass-card p-4">
-        <div className="flex p-1 bg-navy-950/50 rounded-xl border border-navy-800/50 w-fit">
+        <div className="flex flex-wrap p-1 bg-navy-950/50 rounded-xl border border-navy-800/50 w-full sm:w-fit">
           {['All', 'Pending', 'Paid', 'Overdue'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f as any)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${
+              className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all duration-200 ${
                 filter === f 
                   ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20' 
                   : 'text-navy-400 hover:text-navy-200'
@@ -101,7 +101,7 @@ export default function DashboardPage() {
             </button>
           ))}
         </div>
-        <div className="relative flex-1 max-w-md">
+        <div className="relative w-full lg:max-w-md">
           <input
             type="text"
             placeholder="Search by client or invoice number..."

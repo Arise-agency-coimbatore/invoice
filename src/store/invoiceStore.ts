@@ -39,7 +39,7 @@ interface InvoiceState {
 
   initialize: () => Promise<void>;
   createInvoice: (
-    invoice: Omit<Invoice, 'id' | 'user_id' | 'created_at' | 'items'>,
+    invoice: Omit<Invoice, 'id' | 'user_id' | 'created_at' | 'items' | 'share_token' | 'is_public'>,
     items: NewInvoiceItem[]
   ) => Promise<string | null>;
   updateInvoiceStatus: (id: string, status: Invoice['status']) => Promise<void>;

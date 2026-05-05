@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
-import { Plus, Save, Download, FileText, User, Mail, Calendar, Hash, Percent, StickyNote } from 'lucide-react';
+import { Plus, Save, Download, FileText, User, Mail, Calendar, Hash, Percent, StickyNote, Briefcase, Import } from 'lucide-react';
 import LineItemRow from './LineItemRow';
 import { downloadInvoicePDF } from '@/lib/pdf';
-import { useInvoiceStore } from '@/store/invoiceStore';
+import { useInvoiceStore, Client, Project, Task } from '@/store/invoiceStore';
 import { useToastStore } from '@/store/toastStore';
 import { useRouter } from 'next/navigation';
 
@@ -32,8 +32,16 @@ interface InvoiceFormProps {
 
 export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormProps) {
   const router = useRouter();
-  const { createInvoice, getNextInvoiceNumber, isLoading: isSaving } = useInvoiceStore();
+  const { createInvoice, getNextInvoiceNumber, clients, projects, tasks, isLoading: isSaving } = useInvoiceStore();
   const { addToast } = useToastStore();
+
+  const [selectedClientId, setSelectedClientId] = useState<string>('');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+
+  const filteredProjects = useMemo(() => {
+    if (!selectedClientId) return [];
+    return projects.filter(p => p.client_id === selectedClientId);
+  }, [selectedClientId, projects]);
 
   const {
     register,
@@ -60,6 +68,37 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
   });
 
   const watchedValues = useWatch({ control });
+
+  const handleClientSelect = (clientId: string) => {
+    setSelectedClientId(clientId);
+    const client = clients.find(c => c.id === clientId);
+    if (client) {
+      setValue('client_name', client.name);
+      setValue('client_email', client.email);
+    }
+  };
+
+  const importCompletedTasks = () => {
+    if (!selectedProjectId) return;
+    
+    const projectTasks = tasks.filter(t => t.project_id === selectedProjectId && t.status === 'Done');
+    if (projectTasks.length === 0) {
+       addToast('info', 'No completed tasks found for this project.');
+       return;
+    }
+
+    // Clear existing items if they are empty, or just append
+    const currentItems = getValues('items');
+    const isEmpty = currentItems.length === 1 && currentItems[0].name === '' && currentItems[0].price === 0;
+    
+    if (isEmpty) remove(0);
+
+    projectTasks.forEach(task => {
+       append({ name: task.title, quantity: 1, price: 0, total: 0 });
+    });
+
+    addToast('success', `Imported ${projectTasks.length} tasks as line items.`);
+  };
 
   // Load next invoice number on mount if not provided
   useEffect(() => {
@@ -128,10 +167,24 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 pb-20">
       {/* Client Info Section */}
       <section className="glass-card p-6 space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          <User className="h-4 w-4 text-cyan-400" />
-          <h2 className="text-sm font-bold uppercase tracking-widest text-navy-200">Client Information</h2>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-cyan-400" />
+            <h2 className="text-sm font-bold uppercase tracking-widest text-navy-200">Client Information</h2>
+          </div>
+          
+          <select 
+            value={selectedClientId} 
+            onChange={(e) => handleClientSelect(e.target.value)}
+            className="bg-navy-900 border border-navy-700 text-xs text-navy-200 rounded-lg px-2 py-1 outline-none focus:border-cyan-500"
+          >
+            <option value="">Existing Client...</option>
+            {clients.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-navy-400 ml-1">Client Name</label>
@@ -158,6 +211,40 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
             </div>
           </div>
         </div>
+
+        {/* Project Selection */}
+        {selectedClientId && (
+           <div className="pt-4 border-t border-navy-800 animate-fade-in">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                 <div className="flex-1 w-full">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-navy-500 mb-1.5 block ml-1">Link to Project</label>
+                    <div className="relative">
+                       <select 
+                          value={selectedProjectId}
+                          onChange={(e) => setSelectedProjectId(e.target.value)}
+                          className="input-field pl-9 appearance-none"
+                       >
+                          <option value="">Select Project...</option>
+                          {filteredProjects.map(p => (
+                             <option key={p.id} value={p.id}>{p.name}</option>
+                          ))}
+                       </select>
+                       <Briefcase className="absolute left-3 top-3 h-4 w-4 text-navy-500" />
+                    </div>
+                 </div>
+                 {selectedProjectId && (
+                    <button
+                       type="button"
+                       onClick={importCompletedTasks}
+                       className="btn-secondary py-2.5 mt-5 sm:mt-0 w-full sm:w-auto"
+                    >
+                       <Import className="h-4 w-4" />
+                       Import Completed Tasks
+                    </button>
+                 )}
+              </div>
+           </div>
+        )}
       </section>
 
       {/* Invoice Details Section */}

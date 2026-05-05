@@ -2,6 +2,27 @@ import { create } from 'zustand';
 import { supabase } from '@/lib/supabase';
 
 // Types
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+}
+
+export interface Project {
+  id: string;
+  client_id: string;
+  name: string;
+  status: string;
+}
+
+export interface Task {
+  id: string;
+  project_id: string;
+  title: string;
+  status: string;
+}
+
 export interface InvoiceItem {
   id: string;
   invoice_id: string;
@@ -34,6 +55,9 @@ export type NewInvoiceItem = Omit<InvoiceItem, 'id' | 'invoice_id'>;
 
 interface InvoiceState {
   invoices: Invoice[];
+  clients: Client[];
+  projects: Project[];
+  tasks: Task[];
   isInitialized: boolean;
   isLoading: boolean;
 
@@ -52,6 +76,9 @@ interface InvoiceState {
 
 export const useInvoiceStore = create<InvoiceState>((set, get) => ({
   invoices: [],
+  clients: [],
+  projects: [],
+  tasks: [],
   isInitialized: false,
   isLoading: false,
 
@@ -61,13 +88,20 @@ export const useInvoiceStore = create<InvoiceState>((set, get) => ({
 
     set({ isLoading: true });
 
-    const { data: invoices, error } = await supabase
-      .from('invoices')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const [
+      { data: invoices },
+      { data: clients },
+      { data: projects },
+      { data: tasks }
+    ] = await Promise.all([
+      supabase.from('invoices').select('*').order('created_at', { ascending: false }),
+      supabase.from('clients').select('*').order('name', { ascending: true }),
+      supabase.from('projects').select('*').order('name', { ascending: true }),
+      supabase.from('tasks').select('*').eq('status', 'Done')
+    ]);
 
-    if (error) {
-      console.error('Failed to fetch invoices:', error);
+    if (invoices === null) {
+      console.error('Failed to fetch invoices');
       set({ isLoading: false });
       return;
     }
@@ -92,6 +126,9 @@ export const useInvoiceStore = create<InvoiceState>((set, get) => ({
 
     set({
       invoices: invoicesWithItems,
+      clients: clients || [],
+      projects: projects || [],
+      tasks: tasks || [],
       isInitialized: true,
       isLoading: false,
     });

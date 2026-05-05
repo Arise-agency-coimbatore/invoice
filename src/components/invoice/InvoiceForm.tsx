@@ -143,7 +143,7 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
         client_email: data.client_email,
         invoice_number: data.invoice_number,
         issue_date: data.issue_date,
-        due_date: data.due_date,
+        due_date: data.due_date || null,
         notes: data.notes,
         tax: data.tax,
         subtotal,
@@ -189,10 +189,9 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
             <div className="relative">
               <input
                 {...register('client_name', { required: true })}
-                className="input-field pl-9"
+                className="input-field"
                 placeholder="Business or Person"
               />
-              <User className="absolute left-3 top-3 h-4 w-4 text-navy-500" />
             </div>
             {errors.client_name && <p className="text-[10px] text-red-400 ml-1">Required</p>}
           </div>
@@ -202,10 +201,9 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
               <input
                 type="email"
                 {...register('client_email', { required: true })}
-                className="input-field pl-9"
+                className="input-field"
                 placeholder="client@example.com"
               />
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-navy-500" />
             </div>
           </div>
         </div>
@@ -257,9 +255,9 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
             <div className="relative">
               <input
                 {...register('invoice_number', { required: true })}
-                className="input-field pl-9"
+                className="input-field pl-10"
               />
-              <Hash className="absolute left-3 top-3 h-4 w-4 text-navy-500" />
+              <Hash className="absolute left-3 top-[13px] h-4 w-4 text-navy-500" />
             </div>
           </div>
           <div className="space-y-1.5">
@@ -268,9 +266,8 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
               <input
                 type="date"
                 {...register('issue_date', { required: true })}
-                className="input-field pl-9"
+                className="input-field"
               />
-              <Calendar className="absolute left-3 top-3 h-4 w-4 text-navy-500" />
             </div>
           </div>
           <div className="space-y-1.5">
@@ -279,9 +276,8 @@ export default function InvoiceForm({ onDataChange, initialData }: InvoiceFormPr
               <input
                 type="date"
                 {...register('due_date')}
-                className="input-field pl-9"
+                className="input-field"
               />
-              <Calendar className="absolute left-3 top-3 h-4 w-4 text-navy-500" />
             </div>
           </div>
         </div>
